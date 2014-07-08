@@ -1785,9 +1785,7 @@ PACKFILE *_pack_fdopen(int fd, AL_CONST char *mode)
    return f;
 }
 
-
-
-/* pack_fopen:
+/* __allegro_pack_fopen:
  *  Opens a file according to mode, which may contain any of the flags:
  *  'r': open file for reading.
  *  'w': open file for writing, overwriting any existing data.
@@ -1843,6 +1841,33 @@ PACKFILE *__old_pack_fopen(AL_CONST char *filename, AL_CONST char *mode)
    }
 
    return _pack_fdopen(fd, mode);
+}
+
+
+/* pack_fopen:
+ *  Opens a file according to mode, which may contain any of the flags:
+ *  'r': open file for reading.
+ *  'w': open file for writing, overwriting any existing data.
+ *  'p': open file in 'packed' mode. Data will be compressed as it is
+ *       written to the file, and automatically uncompressed during read
+ *       operations. Files created in this mode will produce garbage if
+ *       they are read without this flag being set.
+ *  '!': open file for writing in normal, unpacked mode, but add the value
+ *       F_NOPACK_MAGIC to the start of the file, so that it can be opened
+ *       in packed mode and Allegro will automatically detect that the
+ *       data does not need to be decompressed.
+ *
+ *  Instead of these flags, one of the constants F_READ, F_WRITE,
+ *  F_READ_PACKED, F_WRITE_PACKED or F_WRITE_NOPACK may be used as the second 
+ *  argument to fopen().
+ *
+ *  On success, fopen() returns a pointer to a file structure, and on error
+ *  it returns NULL and stores an error code in errno. An attempt to read a 
+ *  normal file in packed mode will cause errno to be set to EDOM.
+ */
+__attribute__((weak)) PACKFILE *pack_fopen(AL_CONST char *filename, AL_CONST char *mode)
+{
+   return __old_pack_fopen(filename, mode);
 }
 
 
